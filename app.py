@@ -19,7 +19,7 @@ if 'backtest_running' not in st.session_state:
 if 'last_run' not in st.session_state:
     st.session_state.last_run = None
 
-email_recipients = ["xmlkeyserver@gmail.com", "nitinplus@gmail.com", "aamirlodhi46@gmail.com"]
+email_recipients = ["xmlkeyserver@gmail.com", "nitinplus@gmail.com"]
 
 def safe_float(value):
     try:
