@@ -50,15 +50,14 @@ def get_nifty_daily_data():
             'Close': np.random.uniform(24200, 25200, 25)
         }, index=dates)
 
+# QUICK FIX - Replace ONLY the send_email() function in your app.py:
+
 def send_email(recipients, symbol, signals):
     try:
-        sender_email = st.secrets.get("EMAIL_SENDER", "your-email@gmail.com")
-        sender_password = st.secrets.get("EMAIL_PASSWORD", "")
+        # ✅ FIXED: Use YOUR exact secrets structure
+        sender_email = st.secrets["email"]["sender"]  
+        sender_password = st.secrets["email"]["app_password"]
         
-        if not sender_password:
-            st.error("❌ Add email secrets in `.streamlit/secrets.toml`")
-            return False
-            
         server = smtplib.SMTP("smtp.gmail.com", 587)
         server.starttls()
         server.login(sender_email, sender_password)
@@ -92,7 +91,7 @@ def send_email(recipients, symbol, signals):
             success_count += 1
         
         server.quit()
-        st.success(f"✅ {success_count} emails sent!")
+        st.success(f"✅ {success_count} emails sent to: {', '.join(recipients)}")
         return True
     except Exception as e:
         st.error(f"❌ Email failed: {str(e)}")
