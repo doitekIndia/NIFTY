@@ -1,3 +1,4 @@
+# app.py - Production-ready NIFTY50 Flask Scanner (Render/Github compatible)
 from flask import Flask, render_template, request, jsonify, redirect, url_for
 import yfinance as yf
 import pandas as pd
@@ -7,12 +8,13 @@ from datetime import datetime, timedelta
 import smtplib
 from email.mime.text import MIMEText
 import numpy as np
+import os
 import warnings
 warnings.filterwarnings('ignore')
 
 app = Flask(__name__)
 
-# GLOBAL STATE
+# GLOBAL STATE (thread-safe for production)
 FNO_STOCKS = {'NIFTY50': '^NSEI'}
 latest_triggers = {}
 backtest_results = []
@@ -39,17 +41,22 @@ def get_nifty_daily_data():
         data = data.dropna()
         print(f"✅ LAST {len(data)} DAYS | TODAY: {data.index[-1].strftime('%m/%d/%Y')}")
         return data.tail(25)
-    except:
+    except Exception as e:
+        print(f"❌ Data fetch error: {e}")
         return pd.DataFrame()
 
 def send_email(recipients, symbol, signals):
     smtp_server = "smtp.gmail.com"
     smtp_port = 587
 
-    sender_email = st.secrets["email"]["sender"]
-    sender_password = st.secrets["email"]["app_password"]
+    sender_email = os.environ.get("EMAIL_SENDER")
+    sender_password = os.environ.get("EMAIL_APP_PASSWORD")
 
+    if not sender_email or not sender_password:
+        print("❌ Email env vars missing")
+        return False
         
+    try:
         server = smtplib.SMTP(smtp_server, smtp_port)
         server.starttls()
         server.login(sender_email, sender_password)
@@ -78,7 +85,7 @@ def send_email(recipients, symbol, signals):
    T1: ₹{trigger['target1'][:7]}
 
 """
-            body += f"🔗 LIVE DASHBOARD: http://192.168.0.45:9000"
+            body += f"🔗 LIVE DASHBOARD: {request.host_url.rstrip('/')}"
         else:
             body = f"""🔥 NIFTY50 LIVE TRADING ALERT
 📅 Time: {datetime.now().strftime('%Y-%m-%d %H:%M IST')}
@@ -86,15 +93,14 @@ def send_email(recipients, symbol, signals):
 🛑 SL: ₹{signals.get('sl', 0):,.0f}
 🎯 T1: ₹{signals.get('target1', 0):,.0f}
 
-🔗 DASHBOARD: http://192.168.0.45:9000
+🔗 DASHBOARD: {request.host_url.rstrip('/')}
 """
         
-        # FIXED: NEW message for EACH recipient
         for recipient in recipients:
             msg = MIMEText(body)
             msg['Subject'] = subject
             msg['From'] = sender_email
-            msg['To'] = recipient  # SINGLE To header only
+            msg['To'] = recipient
             
             server.send_message(msg)
             print(f"✅ EMAIL SENT → {recipient}")
@@ -232,5 +238,6 @@ def stop_monitoring():
     return redirect(url_for('dashboard'))
 
 if __name__ == '__main__':
-    print("🚀 NIFTY50 FIBONACCI SCANNER - ALL FIXED!")
-    app.run(debug=True, host='0.0.0.0', port=9000)
+    port = int(os.environ.get('PORT', 5000))
+    print(f"🚀 NIFTY50 FIBONACCI SCANNER on port {port}")
+    app.run(host='0.0.0.0', port=port, debug=False)
