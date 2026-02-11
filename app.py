@@ -20,7 +20,7 @@ if 'backtest_running' not in st.session_state:
 if 'monitoring_active' not in st.session_state:
     st.session_state.monitoring_active = False
 
-email_recipients = ["xmlkeyserver@gmail.com", "nitinplus@gmail.com", "aamirlodhi46@gmail.com"]
+email_recipients = ["xmlkeyserver@gmail.com", "nitinplus@gmail.com"]
 
 def safe_float(value):
     """Safe float conversion"""
