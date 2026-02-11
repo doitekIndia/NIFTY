@@ -24,7 +24,7 @@ with st.sidebar:
     if not st.session_state.admin_logged_in:
         st.markdown("### 🔑 **Login**")
         username = st.text_input("👤 Username", placeholder="Username")
-        password = st.text_input("🔑 Password", type="password", placeholder="password")
+        password = st.text_input("🔑 Password", type="password", placeholder="Password")
         
         if st.button("🚀 LOGIN", use_container_width=True):
             if username == st.secrets["admin"]["username"] and password == st.secrets["admin"]["password"]:
