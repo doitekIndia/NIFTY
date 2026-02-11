@@ -216,10 +216,12 @@ with col2:
         threading.Thread(target=send_email, args=(email_recipients, 'LIVE-TEST', signals), daemon=True).start()
 
 with col3:
-    if st.button("📊 **SEND REPORT**", use_container_width=True) and st.session_state.backtest_results:
-        threading.Thread(target=send_email, args=(email_recipients, "BACKTEST-REPORT", {}), daemon=True).start()
-    elif st.button("📊 **SEND REPORT**", use_container_width=True):
-        st.warning("⚠️ Run backtest first!")
+    if st.button("📊 **SEND REPORT**", use_container_width=True, key="send_report_btn"):
+        if st.session_state.backtest_results:
+            threading.Thread(target=send_email, args=(email_recipients, "BACKTEST-REPORT", {}), daemon=True).start()
+        else:
+            st.warning("⚠️ Run backtest first!")
+
 
 with col4:
     if st.button("▶️ **START MONITORING**", use_container_width=True):
