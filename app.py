@@ -1,4 +1,4 @@
-# app.py - NIFTY50 Scanner + LEFT SIDEBAR ADMIN PANEL (Your Secrets)
+# app.py - FIXED NIFTY50 Scanner + LEFT SIDEBAR ADMIN PANEL
 import streamlit as st
 import yfinance as yf
 import pandas as pd
@@ -39,7 +39,7 @@ with st.sidebar:
     st.success("✅ **ADMIN ACTIVE**")
     st.markdown("---")
     
-    # Email management
+    # Email management - FIXED TYPO HERE
     st.markdown("### 📧 **Email Recipients**")
     
     # Add email
@@ -50,9 +50,9 @@ with st.sidebar:
             st.success(f"✅ {new_email} added!")
             st.rerun()
     
-    # Show current emails
-    if st.session_state.email_recipients:
-        for i, email in enumerate(st.session_state.email_recipient):
+    # Show current emails - FIXED: email_recipients (plural)
+    if 'email_recipients' in st.session_state and st.session_state.email_recipients:
+        for i, email in enumerate(st.session_state.email_recipients):  # ✅ FIXED
             col1, col2 = st.columns([4,1])
             with col1:
                 st.write(f"• {email}")
@@ -62,14 +62,14 @@ with st.sidebar:
                     st.success("🗑️ Removed!")
                     st.rerun()
     else:
-        st.warning("No emails")
+        st.warning("⚠️ No emails configured")
     
     st.markdown("---")
     if st.button("🚪 LOGOUT", key="logout"):
         st.session_state.admin_logged_in = False
         st.rerun()
 
-# Initialize session state (after sidebar)
+# Initialize session state (CRITICAL - MUST BE BEFORE ANY USE)
 if 'backtest_results' not in st.session_state:
     st.session_state.backtest_results = []
 if 'backtest_running' not in st.session_state:
@@ -216,6 +216,7 @@ def calculate_backtest(data):
         if range_size <= 0:
             trigger = 'NO TRADE'
             buy_50 = '0.00'
+            target1 = '0.00'
         else:
             buy_618 = yest_low + 0.618 * range_size
             buy_50 = yest_low + 0.5 * range_size
@@ -223,6 +224,7 @@ def calculate_backtest(data):
             trigger = "TRIGGER" if case1 == "YES" and acceptance == "YES" else "NO TRADE"
             target1 = today_open + 0.382 * range_size
             buy_50 = f"{buy_50:.2f}"
+            target1 = f"{target1:.2f}"
         
         results.append({
             'date': today_date,
@@ -233,7 +235,7 @@ def calculate_backtest(data):
             'trigger': trigger,
             'buy_50': buy_50,
             'sl': f"{yest_low:.1f}",
-            'target1': f"{target1:.2f}" if 'target1' in locals() else '0.00'
+            'target1': target1
         })
     return results
 
@@ -277,7 +279,7 @@ if st.session_state.live_signals:
     live_df = pd.DataFrame(st.session_state.live_signals[-10:])
     st.dataframe(live_df, use_container_width=True)
 
-# ==================== BACKTEST SECTION ====================
+# Backtest section
 if st.session_state.backtest_running:
     with st.spinner("🔥 Running NIFTY50 backtest..."):
         data = get_nifty_daily_data()
@@ -321,4 +323,4 @@ if st.session_state.backtest_results:
 
 # Footer
 st.markdown("---")
-st.markdown("*🔥 **LEFT SIDEBAR ADMIN** | Login: nitin/doitdoit123 | Live 30s alerts | Your secrets loaded*")
+st.markdown("*✅ **TYPO FIXED** | LEFT SIDEBAR ADMIN | nitin/doitdoit123 | Live 30s alerts*")
